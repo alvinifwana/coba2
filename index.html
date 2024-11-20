@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Universe</title>
+    
+    <!-- Menambahkan CDN untuk AOS (Animate on Scroll) -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+        .movie-card:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+        }
+
+        .movie-img-container {
+            position: relative;
+        }
+
+        .movie-img-container img {
+            transition: opacity 0.3s ease;
+        }
+
+        .movie-img-container:hover img {
+            opacity: 0.8;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .movie-img-container:hover .overlay {
+            opacity: 1;
+        }
+
+        .movie-card {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .movie-card.loaded {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="bg-gray-50 py-16 sm:py-24 lg:py-32" data-aos="fade-up">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-semibold text-center text-gray-900" data-aos="fade-up">Film Populer</h2>
+            </div>
+
+            <div id="movie-list" class="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-aos="fade-up">
+                <!-- Film akan dimuat di sini melalui JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "c82f5d21f0087a28e5cd4065b9a22055";
+        const totalPages = 5;
+        const movieList = document.getElementById('movie-list');
+
+        async function fetchMovies() {
+            try {
+                let movies = [];
+                for (let page = 1; page <= totalPages; page++) {
+                    const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`);
+                    const data = await response.json();
+                    movies = movies.concat(data.results);
+                }
+
+                displayMovies(movies);
+            } catch (error) {
+                console.error("Error fetching movies:", error);
+            }
+        }
+
+        function displayMovies(movies) {
+            movieList.innerHTML = movies.map(movie => `
+                <div class="movie-card bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out loaded">
+                    <div class="movie-img-container">
+                        <img class="w-full h-64 object-cover" src="https://image.tmdb.org/t/p/w500/${movie.poster_path}" alt="${movie.title}">
+                        <div class="overlay">
+                            <a href="https://www.themoviedb.org/movie/${movie.id}" target="_blank" class="text-white text-xl font-semibold">Lihat Detail</a>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-900">${movie.title}</h3>
+                        <p class="mt-2 text-sm text-gray-500">${movie.overview.substring(0, 100)}...</p>
+                        <p class="mt-2 text-sm text-gray-500">Rating: ${movie.vote_average} / 10</p>
+                        <p class="text-xs text-gray-400">Rilis: ${new Date(movie.release_date).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchMovies();
+        });
+    </script>
+
+    <!-- Menambahkan AOS JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+        });
+    </script>
+</body>
+</html>
